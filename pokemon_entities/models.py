@@ -1,19 +1,34 @@
 from django.db import models
 
 
+class PokemonElementType(models.Model):
+    title = models.CharField(max_length=30)
+
+    def __str__(self):
+        return f"{self.title}"
+
+
 class Pokemon(models.Model):
     title = models.CharField(max_length=200, verbose_name="Имя покемона")
+
     title_en = models.CharField(max_length=200,
                                 verbose_name="Имя покемона(английский)")
+
     title_jp = models.CharField(max_length=200,
                                 verbose_name="Имя покемона(японский)")
+
     photo = models.ImageField(null=True, blank=True,
                               verbose_name="Изображение")
+
     description = models.TextField(verbose_name="Описание")
+
+    element_type = models.ManyToManyField(PokemonElementType)
+
     previous_evolution = models.ForeignKey("self", on_delete=models.CASCADE,
                                            null=True, blank=True,
                                            related_name="pokemons",
                                            verbose_name="Из кого эволюционировал")
+
     next_evolution = models.ForeignKey("self", on_delete=models.CASCADE,
                                        null=True, blank=True,
                                        verbose_name="В кого эволюционирует")
