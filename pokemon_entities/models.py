@@ -24,17 +24,12 @@ class Pokemon(models.Model):
                                    verbose_name="Описание")
 
     element_type = models.ManyToManyField(PokemonElementType,
-                                          null=True, blank=True)
+                                          blank=True)
 
     previous_evolution = models.ForeignKey("self", on_delete=models.CASCADE,
                                            null=True, blank=True,
-                                           related_name="previous_evolutions",
+                                           related_name='next_evolutions',
                                            verbose_name="Из кого эволюционировал")
-
-    next_evolution = models.ForeignKey("self", on_delete=models.CASCADE,
-                                       null=True, blank=True,
-                                       related_name="next_evolutions",
-                                       verbose_name="В кого эволюционирует")
 
     def __str__(self):
         return f"{self.title}"
