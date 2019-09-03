@@ -1,6 +1,7 @@
 import folium
 
 from django.shortcuts import render, get_object_or_404
+from django.db import connection
 
 from .models import Pokemon, PokemonEntity
 
@@ -60,14 +61,13 @@ def show_all_pokemons(request):
 def show_pokemon(request, pokemon_id):
     pokemon = get_object_or_404(Pokemon, id=pokemon_id)
     folium_map = folium.Map(location=MOSCOW_CENTER, zoom_start=12)
-    req_pokemon = PokemonEntity.objects.select_related('pokemon').filter(pokemon=pokemon)
+    req_pokemon = PokemonEntity.objects.select_related('pokemon__previous_evolution').filter(pokemon=pokemon)
     for pok_entity in req_pokemon:
         add_pokemon(
             folium_map, pok_entity.latitude, pok_entity.longitude,
             pok_entity.pokemon.title, pok_entity.level, pok_entity.health,
             pok_entity.attack, pok_entity.defence, pok_entity.stamina,
             request.build_absolute_uri(pok_entity.pokemon.photo.url))
-
     pokemon_info = {
         'pokemon_id': pokemon.id,
         'img_url': pokemon.photo.url,
@@ -80,7 +80,6 @@ def show_pokemon(request, pokemon_id):
             'title': pokemon.element_type.get().title
         }
     }
-
     if pokemon.previous_evolution:
         previous_evolution = {
             **pokemon_info,
@@ -104,6 +103,8 @@ def show_pokemon(request, pokemon_id):
         next_evolution = {}
 
     pokemon_on_page = {**previous_evolution, **next_evolution}
+    Pokemon.objects.count()
+    print(len(connection.queries))
 
     return render(request, "pokemon.html",
                   context={'map': folium_map._repr_html_(),
