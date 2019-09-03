@@ -2,7 +2,9 @@ from django.db import models
 
 
 class PokemonElementType(models.Model):
-    title = models.CharField(max_length=30)
+    title = models.CharField(max_length=30, verbose_name="Стихия покемона")
+    image = models.ImageField(null=True, blank=True,
+                              verbose_name="Изображение")
 
     def __str__(self):
         return f"{self.title}"
@@ -24,7 +26,8 @@ class Pokemon(models.Model):
                                    verbose_name="Описание")
 
     element_type = models.ManyToManyField(PokemonElementType,
-                                          blank=True)
+                                          blank=True,
+                                          verbose_name="Стихия покемона")
 
     previous_evolution = models.ForeignKey("self", on_delete=models.CASCADE,
                                            null=True, blank=True,

@@ -64,7 +64,8 @@ def show_pokemon(request, pokemon_id):
     for pok_entity in req_pokemon:
         add_pokemon(
             folium_map, pok_entity.latitude, pok_entity.longitude,
-            pok_entity.pokemon.title,
+            pok_entity.pokemon.title, pok_entity.level, pok_entity.health,
+            pok_entity.attack, pok_entity.defence, pok_entity.stamina,
             request.build_absolute_uri(pok_entity.pokemon.photo.url))
 
     pokemon_info = {
@@ -73,38 +74,36 @@ def show_pokemon(request, pokemon_id):
         'title_ru': pokemon.title,
         'title_en': pokemon.title_en,
         'title_jp': pokemon.title_jp,
-        'description': pokemon.description
+        'description': pokemon.description,
+        'element_type': {
+            'img': pokemon.element_type.get().image.url, #Разобраться почему не отображается картинка
+            'title': pokemon.element_type.get().title
+        }
     }
-    try:
-        if pokemon.previous_evolution:
-            pokemon_on_page = {
-                **pokemon_info,
-                'previous_evolution': {
-                    'title_ru': pokemon.previous_evolution.title,
-                    'pokemon_id': pokemon.previous_evolution.id,
-                    'img_url': pokemon.previous_evolution.photo.url},
-                'next_evolution': {
-                    'title_ru': pokemon.next_evolutions.get().title,
-                    'pokemon_id': pokemon.next_evolutions.get().id,
-                    'img_url': pokemon.next_evolutions.get().photo.url}
-            }
 
-        else:
-            pokemon_on_page = {
-                **pokemon_info,
-                'next_evolution': {
-                    'title_ru': pokemon.next_evolutions.get().title,
-                    'pokemon_id': pokemon.next_evolutions.get().id,
-                    'img_url': pokemon.next_evolutions.get().photo.url}
-            }
-    except Pokemon.DoesNotExist:
-            pokemon_on_page = {
-                **pokemon_info,
-                'previous_evolution': {
-                    'title_ru': pokemon.previous_evolution.title,
-                    'pokemon_id': pokemon.previous_evolution.id,
-                    'img_url': pokemon.previous_evolution.photo.url}
-            }
+    if pokemon.previous_evolution:
+        previous_evolution = {
+            **pokemon_info,
+            'previous_evolution': {
+                'title_ru': pokemon.previous_evolution.title,
+                'pokemon_id': pokemon.previous_evolution.id,
+                'img_url': pokemon.previous_evolution.photo.url},
+        }
+    else:
+        previous_evolution = {}
+
+    if pokemon.next_evolutions.exists():
+        next_evolution = {
+            **pokemon_info,
+            'next_evolution': {
+                'title_ru': pokemon.next_evolutions.get().title,
+                'pokemon_id': pokemon.next_evolutions.get().id,
+                'img_url': pokemon.next_evolutions.get().photo.url}
+        }
+    else:
+        next_evolution = {}
+
+    pokemon_on_page = {**previous_evolution, **next_evolution}
 
     return render(request, "pokemon.html",
                   context={'map': folium_map._repr_html_(),
