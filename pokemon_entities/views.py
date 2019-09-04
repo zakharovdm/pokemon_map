@@ -61,13 +61,14 @@ def show_all_pokemons(request):
 def show_pokemon(request, pokemon_id):
     pokemon = get_object_or_404(Pokemon, id=pokemon_id)
     folium_map = folium.Map(location=MOSCOW_CENTER, zoom_start=12)
-    req_pokemon = PokemonEntity.objects.select_related('pokemon__previous_evolution').filter(pokemon=pokemon)
+    req_pokemon = PokemonEntity.objects.select_related('pokemon').filter(pokemon=pokemon)
     for pok_entity in req_pokemon:
         add_pokemon(
             folium_map, pok_entity.latitude, pok_entity.longitude,
             pok_entity.pokemon.title, pok_entity.level, pok_entity.health,
             pok_entity.attack, pok_entity.defence, pok_entity.stamina,
             request.build_absolute_uri(pok_entity.pokemon.photo.url))
+    element_type = pokemon.element_type.get()
     pokemon_info = {
         'pokemon_id': pokemon.id,
         'img_url': pokemon.photo.url,
@@ -76,8 +77,8 @@ def show_pokemon(request, pokemon_id):
         'title_jp': pokemon.title_jp,
         'description': pokemon.description,
         'element_type': {
-            'img': pokemon.element_type.get().image.url, #Разобраться почему не отображается картинка
-            'title': pokemon.element_type.get().title
+            'img': element_type.image.url, #Разобраться почему не отображается картинка
+            'title': element_type.title
         }
     }
     if pokemon.previous_evolution:
@@ -92,12 +93,13 @@ def show_pokemon(request, pokemon_id):
         previous_evolution = {}
 
     if pokemon.next_evolutions.exists():
+        next_evolut = pokemon.next_evolutions.get()
         next_evolution = {
             **pokemon_info,
             'next_evolution': {
-                'title_ru': pokemon.next_evolutions.get().title,
-                'pokemon_id': pokemon.next_evolutions.get().id,
-                'img_url': pokemon.next_evolutions.get().photo.url}
+                'title_ru': next_evolut.title,
+                'pokemon_id': next_evolut.id,
+                'img_url': next_evolut.photo.url}
         }
     else:
         next_evolution = {}
