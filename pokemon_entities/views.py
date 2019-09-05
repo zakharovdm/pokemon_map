@@ -70,12 +70,16 @@ def show_pokemon(request, pokemon_id):
             request.build_absolute_uri(pok_entity.pokemon.photo.url))
     element_type = pokemon.element_type.all()
     elements = []
+    strong_against = []
     for element in element_type:
         elements.append({
             'img': element.image.url,
-            'title': element.title
+            'title': element.title,
+            'strong_against': strong_against
         })
-
+        for strong_element in element.strong_against.all():
+            strong_against.append(strong_element.title)
+        strong_against = []
     pokemon_info = {
         'pokemon_id': pokemon.id,
         'img_url': pokemon.photo.url,
@@ -109,7 +113,6 @@ def show_pokemon(request, pokemon_id):
         next_evolution = {}
 
     pokemon_on_page = {**previous_evolution, **next_evolution}
-
     return render(request, "pokemon.html",
                   context={'map': folium_map._repr_html_(),
                            'pokemon': pokemon_on_page})
