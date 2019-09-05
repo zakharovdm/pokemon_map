@@ -68,7 +68,14 @@ def show_pokemon(request, pokemon_id):
             pok_entity.pokemon.title, pok_entity.level, pok_entity.health,
             pok_entity.attack, pok_entity.defence, pok_entity.stamina,
             request.build_absolute_uri(pok_entity.pokemon.photo.url))
-    element_type = pokemon.element_type.get()
+    element_type = pokemon.element_type.all()
+    elements = []
+    for element in element_type:
+        elements.append({
+            'img': element.image.url,
+            'title': element.title
+        })
+
     pokemon_info = {
         'pokemon_id': pokemon.id,
         'img_url': pokemon.photo.url,
@@ -76,10 +83,7 @@ def show_pokemon(request, pokemon_id):
         'title_en': pokemon.title_en,
         'title_jp': pokemon.title_jp,
         'description': pokemon.description,
-        'element_type': {
-            'img': element_type.image.url, #Разобраться почему не отображается картинка
-            'title': element_type.title
-        }
+        'element_type': elements
     }
     if pokemon.previous_evolution:
         previous_evolution = {
@@ -105,8 +109,6 @@ def show_pokemon(request, pokemon_id):
         next_evolution = {}
 
     pokemon_on_page = {**previous_evolution, **next_evolution}
-    Pokemon.objects.count()
-    print(len(connection.queries))
 
     return render(request, "pokemon.html",
                   context={'map': folium_map._repr_html_(),
