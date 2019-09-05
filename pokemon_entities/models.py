@@ -5,7 +5,8 @@ class PokemonElementType(models.Model):
     title = models.CharField(max_length=30, verbose_name="Стихия покемона")
     image = models.ImageField(null=True, blank=True,
                               verbose_name="Изображение")
-    strong_against = models.ManyToManyField("self", blank=True,
+    strong_against = models.ManyToManyField("self", symmetrical=False,
+                                            blank=True,
                                             verbose_name="Силен против")
 
     def __str__(self):
